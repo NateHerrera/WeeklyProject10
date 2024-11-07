@@ -1,24 +1,35 @@
 package main
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
+    rl "github.com/gen2brain/raylib-go/raylib"
+)
 
+const (
+    screenWidth  = 1600
+    screenHeight = 900
 )
 
 func main() {
-	rl.InitWindow(800, 450, "raylib [core] example - basic window")
+    rl.InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window")
 
-	rl.SetTargetFPS(60)
+    rl.SetTargetFPS(60)
 
-	for !rl.WindowShouldClose() {
-		rl.BeginDrawing()
+    platformWidth := float32(screenWidth / 2)
+    platform := Platform{
+        Pos:   rl.NewVector2((screenWidth-platformWidth)/2, screenHeight-250), // Centered position of the blocker
+        Size:  rl.NewVector2(platformWidth, 100),
+        Color: rl.Gray,
+    }
 
-		rl.ClearBackground(rl.RayWhite)
+    for !rl.WindowShouldClose() {
+        rl.BeginDrawing()
 
-		rl.DrawText("Congrats! You created your first window!", 190, 200, 20, rl.LightGray)
+        rl.ClearBackground(rl.RayWhite)
 
-		rl.EndDrawing()
-	}
+        platform.DrawPlatform()
 
-	rl.CloseWindow()
+        rl.EndDrawing()
+    }
+
+    rl.CloseWindow()
 }
