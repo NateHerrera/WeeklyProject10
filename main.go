@@ -10,7 +10,7 @@ const (
 )
 
 func main() {
-	rl.InitWindow(screenWidth, screenHeight, "raylib [core] example - seamless parallax background")
+	rl.InitWindow(screenWidth, screenHeight, "Stickman Fighters")
 	defer rl.CloseWindow()
 	rl.SetTargetFPS(60)
 
