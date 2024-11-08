@@ -5,11 +5,11 @@ import rl "github.com/gen2brain/raylib-go/raylib"
 type Platform struct {
 	Pos   rl.Vector2
 	Size  rl.Vector2
-	Texture rl.Texture2D
+	Color rl.Color
 }
 
 func (p Platform) DrawPlatform() {
-	rl.DrawTexture(p.Texture, int32(p.Pos.X), int32(p.Pos.Y), rl.White)
+	rl.DrawRectangle(int32(p.Pos.X), int32(p.Pos.Y), int32(p.Size.X), int32(p.Size.Y), p.Color)
 }
 
 // func CheckCollision(box *Box, blocker Blocker) {
