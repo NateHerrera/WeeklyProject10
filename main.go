@@ -18,7 +18,7 @@ func main() {
     platform := Platform{
         Pos:   rl.NewVector2((screenWidth-platformWidth)/2, screenHeight-250), // Centered position of the blocker
         Size:  rl.NewVector2(platformWidth, 100),
-        Color: rl.Gray,
+        Texture: rl.LoadTexture("./assets/platform-1.png.png"),
     }
 
     for !rl.WindowShouldClose() {
