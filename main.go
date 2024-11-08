@@ -21,11 +21,37 @@ func main() {
 
 	// Load the platform
 	platformWidth := float32(screenWidth / 2)
-	platform := Platform{
+	platform1 := Platform{
 		Pos:   rl.NewVector2((screenWidth-platformWidth)/2, screenHeight-250),
-		Size:  rl.NewVector2(platformWidth, 100),
-		Color: rl.DarkGreen,
+		Size:  rl.NewVector2(platformWidth, 50),
+		Color: rl.White,
 	}
+
+	platform2 := Platform{
+		Pos: rl.NewVector2((screenWidth-platformWidth)/2 - 150, screenHeight-450),
+		Size: rl.NewVector2(platformWidth/2 - 100, 30),
+		Color: rl.White,
+	}
+
+	platform3 := Platform{
+		Pos: rl.NewVector2((screenWidth-platformWidth)/2 + 650, screenHeight-450),
+		Size: rl.NewVector2(platformWidth/2 - 100, 30),
+		Color: rl.White,
+	}
+
+	platform4 := Platform{
+		Pos: rl.NewVector2((screenWidth-platformWidth)/2 + 225, screenHeight-650),
+		Size: rl.NewVector2(platformWidth/2 - 50, 30),
+		Color: rl.White,
+	}
+
+	box := Box{
+		Pos:   rl.NewVector2(400, 300),
+		Vel:   rl.NewVector2(0, 0),
+		Size:  rl.NewVector2(50, 50),
+		Color: rl.Red,
+	}
+	gravity := rl.NewVector2(0, 980)
 
 	// Set background scale for resizing
 	backgroundScale := float32(screenHeight) / float32(backgroundTexture.Height)
@@ -59,8 +85,21 @@ func main() {
 		drawSeamlessLayer(foregroundTexture, scrollingFore, backgroundScale)
 
 		// Draw the platform
-		platform.DrawPlatform()
+		platform1.DrawPlatform()
+		platform2.DrawPlatform()
+		platform3.DrawPlatform()
+		platform4.DrawPlatform()
 
+		box.ApplyGravity(gravity)
+		box.UpdateBox()
+
+		CheckCollision(&box, platform1)
+		CheckCollision(&box, platform2)
+		CheckCollision(&box, platform3)
+		CheckCollision(&box, platform4)
+
+		box.DrawBox()
+		
 		rl.EndDrawing()
 	}
 }
