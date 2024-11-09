@@ -77,7 +77,7 @@ func (p *Player) HandlePlayer() {
 		p.Flip = -1
 	} else if rl.IsKeyDown(rl.KeyW) {
 		p.ChangeState(JUMPSTATE)
-		p.Transform.Pos.Y -= 10 // Move 10 pixel up 
+		p.Transform.Pos.Y -= 10 // Move 10 pixel up
 	} else if rl.IsKeyDown(rl.KeyS) {
 		p.ChangeState(BLOCKSTATE)
 	} else if rl.IsKeyDown(rl.KeyE) {
