@@ -31,6 +31,7 @@ func (sm *StateMachine) ChangeState(stateName string) {
 
     sm.CurrentState.ResetTime()
     sm.CurrentState = sm.StateMap[stateName]
+	sm.CurrentState.TickState()
 }
 
 func (sm *StateMachine) Tick() {
