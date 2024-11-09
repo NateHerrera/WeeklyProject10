@@ -28,29 +28,30 @@ func main() {
 	}
 
 	platform2 := Platform{
-		Pos: rl.NewVector2((screenWidth-platformWidth)/2 - 150, screenHeight-450),
-		Size: rl.NewVector2(platformWidth/2 - 100, 30),
+		Pos:   rl.NewVector2((screenWidth-platformWidth)/2-150, screenHeight-450),
+		Size:  rl.NewVector2(platformWidth/2-100, 30),
 		Color: rl.White,
 	}
 
 	platform3 := Platform{
-		Pos: rl.NewVector2((screenWidth-platformWidth)/2 + 650, screenHeight-450),
-		Size: rl.NewVector2(platformWidth/2 - 100, 30),
+		Pos:   rl.NewVector2((screenWidth-platformWidth)/2+650, screenHeight-450),
+		Size:  rl.NewVector2(platformWidth/2-100, 30),
 		Color: rl.White,
 	}
 
 	platform4 := Platform{
-		Pos: rl.NewVector2((screenWidth-platformWidth)/2 + 225, screenHeight-650),
-		Size: rl.NewVector2(platformWidth/2 - 50, 30),
+		Pos:   rl.NewVector2((screenWidth-platformWidth)/2+225, screenHeight-650),
+		Size:  rl.NewVector2(platformWidth/2-50, 30),
 		Color: rl.White,
 	}
 
-	box := Box{
-		Pos:   rl.NewVector2(400, 300),
-		Vel:   rl.NewVector2(0, 0),
-		Size:  rl.NewVector2(50, 50),
-		Color: rl.Red,
-	}
+	// box := Box{
+	// 	Pos:   rl.NewVector2(400, 300),
+	// 	Vel:   rl.NewVector2(0, 0),
+	// 	Size:  rl.NewVector2(50, 50),
+	// 	Color: rl.Red,
+	// }
+	player1 := NewPlayer(1)
 	gravity := rl.NewVector2(0, 980)
 
 	// Set background scale for resizing
@@ -90,16 +91,17 @@ func main() {
 		platform3.DrawPlatform()
 		platform4.DrawPlatform()
 
-		box.ApplyGravity(gravity)
-		box.UpdateBox()
+		// box.ApplyGravity(gravity)
+		// box.UpdateBox()
 
-		CheckCollision(&box, platform1)
-		CheckCollision(&box, platform2)
-		CheckCollision(&box, platform3)
-		CheckCollision(&box, platform4)
+		CheckCollision(&player1.Box, platform1)
+		CheckCollision(&player1.Box, platform2)
+		CheckCollision(&player1.Box, platform3)
+		CheckCollision(&player1.Box, platform4)
 
-		box.DrawBox()
-		
+		player1.UpdatePlayer(gravity)
+		// box.DrawBox()
+
 		rl.EndDrawing()
 	}
 }
