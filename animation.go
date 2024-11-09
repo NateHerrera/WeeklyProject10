@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -45,11 +43,11 @@ func (a *Animation) GetName() string {
 
 func (a *Animation) ResetTime() {
 	a.Timer = 0
+	a.CurrentIndex = 0
 }
 
 func NewAnimation(newTransform *Transform, newSheet rl.Texture2D, newTime float32, newName string) Animation {
 	spriteDimension := newSheet.Height
-	fmt.Println(newSheet.Height, newSheet.Width)
 	frames := int(newSheet.Width / spriteDimension)
 	newAnimation := Animation{
 		Transform:    newTransform,
@@ -68,10 +66,9 @@ func (a *Animation) UpdateTime() {
 	if a.Timer > a.SwitchTime {
 		a.Timer = 0
 		a.CurrentIndex++
-	}
-
-	if a.CurrentIndex > a.MaxIndex {
-		a.CurrentIndex = 0
+		if a.CurrentIndex > a.MaxIndex {
+			a.CurrentIndex = 0
+		}
 	}
 }
 
@@ -80,5 +77,4 @@ func (a Animation) DrawAnimation() {
 	destRect := rl.NewRectangle(a.Pos.X, a.Pos.Y, float32(a.Scale.X), float32(a.Scale.Y))
 	origin := rl.NewVector2(a.Scale.X/2, a.Scale.Y/2)
 	rl.DrawTexturePro(a.SpriteSheet, sourceRect, destRect, origin, 0, rl.White)
-
 }

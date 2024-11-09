@@ -25,12 +25,12 @@ func (sm *StateMachine) AddState(newState State) {
 }
 
 func (sm *StateMachine) ChangeState(stateName string) {
-	if sm.CurrentState.GetName() == stateName {
-		return
-	}
-	sm.CurrentState = sm.StateMap[stateName]
-	sm.CurrentState.ResetTime()
+    if sm.CurrentState.GetName() == stateName {
+        return
+    }
 
+    sm.CurrentState.ResetTime()
+    sm.CurrentState = sm.StateMap[stateName]
 }
 
 func (sm *StateMachine) Tick() {
