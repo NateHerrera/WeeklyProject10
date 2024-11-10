@@ -25,7 +25,8 @@ type Player struct {
 	*Transform
 	Box
 	StateMachine
-	Health int
+	Health   int
+	PlayerID int
 }
 
 func NewPlayer(numPlayer int) Player {
@@ -45,10 +46,19 @@ func NewPlayer(numPlayer int) Player {
 		playerIdle = rl.LoadTexture("./assets/secondplayerright.png")
 		playerWalk = rl.LoadTexture("./assets/secondplayerrunright.png")
 		playerJump = rl.LoadTexture("./assets/secondplayerjump.png")
-		playerBlock = rl.LoadTexture("./assets/secondplayerright.png")
+		playerBlock = rl.LoadTexture("./assets/secondplayerblock.png")
 		playerAttack = rl.LoadTexture("./assets/secondplayerpunch.png")
 	}
+
 	playerTransform := NewTransform(rl.NewVector2(300, 400))
+
+	// Set initial Flip based on player ID
+	if numPlayer == 1 {
+		playerTransform.Flip = 1
+	} else {
+		playerTransform.Flip = -1
+	}
+
 	idleState := NewAnimation(playerTransform, playerIdle, .2, IDLESTATE)
 	walkState := NewAnimation(playerTransform, playerWalk, .2, WALKSTATE)
 	jumpState := NewAnimation(playerTransform, playerJump, .2, JUMPSTATE)
@@ -63,29 +73,80 @@ func NewPlayer(numPlayer int) Player {
 		Transform:    playerTransform,
 		Box:          Box{Transform: playerTransform, Size: rl.NewVector2(64, 64), Color: rl.Red},
 		StateMachine: playerStateMachine,
+		PlayerID:     numPlayer,
 	}
 }
 
 func (p *Player) HandlePlayer() {
-	if rl.IsKeyDown(rl.KeyD) {
-		p.ChangeState(WALKSTATE)
-		p.Transform.Pos.X += 4 // Move 4 pixel to the right per frame
-		p.Flip = 1
-	} else if rl.IsKeyDown(rl.KeyA) {
-		p.ChangeState(WALKSTATE)
-		p.Transform.Pos.X -= 4 // Move 4 pixel to the left per frame
-		p.Flip = -1
-	} else if rl.IsKeyDown(rl.KeyW) {
-		p.ChangeState(JUMPSTATE)
-		p.Transform.Pos.Y -= 10 // Move 10 pixel up
-	} else if rl.IsKeyDown(rl.KeyS) {
-		p.ChangeState(BLOCKSTATE)
-	} else if rl.IsKeyDown(rl.KeyE) {
-		p.ChangeState(ATTACKSTATE)
-	} else {
-		p.ChangeState(IDLESTATE)
+	if p.PlayerID == 1 { // Controls for Player 1
+		if rl.IsKeyDown(rl.KeyD) {
+			p.ChangeState(WALKSTATE)
+			p.Transform.Pos.X += 4
+			p.Flip = 1
+		} else if rl.IsKeyDown(rl.KeyA) {
+			p.ChangeState(WALKSTATE)
+			p.Transform.Pos.X -= 4
+			p.Flip = -1
+		} else if rl.IsKeyDown(rl.KeyW) {
+			p.ChangeState(JUMPSTATE)
+			p.Transform.Pos.Y -= 10
+		} else if rl.IsKeyDown(rl.KeyS) {
+			p.PerformBlock()
+		} else if rl.IsKeyDown(rl.KeyE) {
+			p.PerformAttack()
+		} else {
+			p.ChangeState(IDLESTATE)
+		}
+	} else if p.PlayerID == 2 { // Controls for Player 2
+		if rl.IsKeyDown(rl.KeyRight) {
+			p.ChangeState(WALKSTATE)
+			p.Transform.Pos.X += 4
+			p.Flip = 1
+		} else if rl.IsKeyDown(rl.KeyLeft) {
+			p.ChangeState(WALKSTATE)
+			p.Transform.Pos.X -= 4
+			p.Flip = -1
+		} else if rl.IsKeyDown(rl.KeyUp) {
+			p.ChangeState(JUMPSTATE)
+			p.Transform.Pos.Y -= 10
+		} else if rl.IsKeyDown(rl.KeyDown) {
+			p.PerformBlock()
+		} else if rl.IsKeyDown(rl.KeySpace) {
+			p.PerformAttack()
+		} else {
+			p.ChangeState(IDLESTATE)
+		}
 	}
+}
 
+// Now we need to implement the PerformAttack and PerformBlock functions
+// To flip the character whoich ever way theyre facing
+func (p *Player) PerformAttack() {
+	// Set attack offset based on current Flip direction
+	attackOffset := rl.NewVector2(30*float32(p.Flip), 0) // Use Flip as set in NewPlayer
+
+	// Calculate the attack position based on offset
+	attackPos := rl.Vector2Add(p.Transform.Pos, attackOffset)
+
+	// Draw a hitbox for the attack (visual cue)
+	rl.DrawRectangle(int32(attackPos.X), int32(attackPos.Y), 20, 10, rl.Red)
+
+	p.ChangeState(ATTACKSTATE)
+}
+
+// Same for the block
+func (p *Player) PerformBlock() {
+	// Show block position based on Flip
+	blockOffset := rl.NewVector2(15, 0) // Offset for block positioning
+	if p.Flip == -1 {                   // Facing left
+		blockOffset.X = -15
+	}
+	blockPos := rl.Vector2Add(p.Transform.Pos, blockOffset)
+
+	// Draw the block hitbox or stance
+	rl.DrawRectangle(int32(blockPos.X), int32(blockPos.Y), 25, 15, rl.Blue) // Visual cue for block
+
+	p.ChangeState(BLOCKSTATE)
 }
 
 func (p *Player) UpdatePlayer(g rl.Vector2, screenWidth float32) {

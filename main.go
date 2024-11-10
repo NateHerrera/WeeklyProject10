@@ -47,6 +47,9 @@ func main() {
 
 	player1 := NewPlayer(1)
 	gravity := rl.NewVector2(0, 980)
+	player2 := NewPlayer(2)
+	player2.Transform.Pos = rl.NewVector2(1300, 400)
+	
 
 	// Set background scale for resizing
 	backgroundScale := float32(screenHeight) / float32(backgroundTexture.Height)
@@ -90,8 +93,13 @@ func main() {
 		CheckCollision(&player1.Box, platform2)
 		CheckCollision(&player1.Box, platform3)
 		CheckCollision(&player1.Box, platform4)
+		CheckCollision(&player2.Box, platform1)
+		CheckCollision(&player2.Box, platform2)
+		CheckCollision(&player2.Box, platform3)
+		CheckCollision(&player2.Box, platform4)
 		// Update and draw the player
 		player1.UpdatePlayer(gravity, screenWidth)
+		player2.UpdatePlayer(gravity, screenWidth)
 
 		rl.EndDrawing()
 	}
