@@ -77,7 +77,7 @@ func NewPlayer(numPlayer int) Player {
 
 	return Player{
 		Transform:    playerTransform,
-		Box:          Box{Transform: playerTransform, Size: rl.NewVector2(64, 64), Color: rl.Red},
+		Box:          Box{Transform: playerTransform, Size: rl.NewVector2(128, 128), Color: rl.Red},
 		StateMachine: playerStateMachine,
 		PlayerID:     numPlayer,
 	}
@@ -86,24 +86,32 @@ func NewPlayer(numPlayer int) Player {
 func (p *Player) HandlePlayer() {
 	if p.PlayerID == 1 { // Controls for Player 1
 		if rl.IsKeyDown(rl.KeyD) {
-			p.ChangeState(WALKSTATE)
-			p.Transform.Pos.X += 4
+			if p.CurrentState.GetName() == IDLESTATE {
+				p.ChangeState(WALKSTATE)
+			}
+			p.Box.Vel.X = 500
 			p.Flip = 1
 		} else if rl.IsKeyDown(rl.KeyA) {
-			p.ChangeState(WALKSTATE)
-			p.Transform.Pos.X -= 4
+			if p.CurrentState.GetName() == IDLESTATE {
+				p.ChangeState(WALKSTATE)
+			}
+			p.Box.Vel.X = -500
 			p.Flip = -1
-		} else if rl.IsKeyDown(rl.KeyW) {
+		} else {
+			p.Box.Vel.X = 0
+			if p.CurrentState.GetName() != JUMPSTATE {
+				p.ChangeState(IDLESTATE)
+			}
+		}
+		if rl.IsKeyPressed(rl.KeyW) {
 			p.ChangeState(JUMPSTATE)
-			p.Transform.Pos.Y -= 10
+			p.Box.Vel.Y = -500
 		} else if rl.IsKeyDown(rl.KeyS) {
 			p.PerformBlock()
 		} else if rl.IsKeyDown(rl.KeyE) {
 			p.PerformAttack()
 		} else if rl.IsKeyDown(rl.KeyF) {
 			p.PerformHeavy()
-		} else {
-			p.ChangeState(IDLESTATE)
 		}
 	} else if p.PlayerID == 2 { // Controls for Player 2
 		if rl.IsKeyDown(rl.KeyRight) {
@@ -158,7 +166,6 @@ func (p *Player) PerformHeavy() {
 	p.ChangeState(HEAVYSTATE)
 }
 
-
 // Same for the block
 func (p *Player) PerformBlock() {
 	// Show block position based on Flip
@@ -184,7 +191,8 @@ func (p *Player) UpdatePlayer(g rl.Vector2, screenWidth float32) {
 	} else if p.Transform.Pos.X+p.Scale.X > screenWidth {
 		p.Transform.Pos.X = screenWidth - p.Scale.X
 	}
-
-	p.UpdateBox()
+	p.DrawBox()
 	p.Tick()
+	p.UpdateBox()
+
 }

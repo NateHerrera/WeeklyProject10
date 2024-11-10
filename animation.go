@@ -10,7 +10,7 @@ const (
 	JUMPSTATE   = "jump"
 	BLOCKSTATE  = "block"
 	ATTACKSTATE = "attack"
-	HEAVYSTATE = "heavy"
+	HEAVYSTATE  = "heavy"
 )
 
 type Transform struct {
@@ -76,6 +76,6 @@ func (a *Animation) UpdateTime() {
 func (a Animation) DrawAnimation() {
 	sourceRect := rl.NewRectangle(float32(64*a.CurrentIndex), 0, 64*float32(a.Flip), 64)
 	destRect := rl.NewRectangle(a.Pos.X, a.Pos.Y, float32(a.Scale.X), float32(a.Scale.Y))
-	origin := rl.NewVector2(a.Scale.X/2, a.Scale.Y/2)
-	rl.DrawTexturePro(a.SpriteSheet, sourceRect, destRect, origin, 0, rl.White)
+	//origin := rl.NewVector2(a.Scale.X/2, a.Scale.Y/2)
+	rl.DrawTexturePro(a.SpriteSheet, sourceRect, destRect, rl.Vector2Zero(), 0, rl.White)
 }

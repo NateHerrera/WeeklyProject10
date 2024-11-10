@@ -19,7 +19,7 @@ func CheckCollision(box *Box, platform Platform) {
 	) {
 		if box.Pos.Y+box.Size.Y > platform.Pos.Y && box.Vel.Y > 0 { //now check which side to stop the velocity
 			box.Pos.Y = platform.Pos.Y - box.Size.Y //move box in case of overlap
-			box.Vel.Y = 0                          //stop the box from moving further
+			box.Vel.Y = 0                           //stop the box from moving further
 		}
 		if box.Pos.Y < platform.Pos.Y+platform.Size.Y && box.Vel.Y < 0 {
 			box.Pos.Y = platform.Pos.Y + platform.Size.Y
