@@ -10,6 +10,7 @@ const (
 	JUMPSTATE   = "jump"
 	BLOCKSTATE  = "block"
 	ATTACKSTATE = "attack"
+	HEAVYSTATE = "heavy"
 )
 
 type Transform struct {

@@ -35,6 +35,7 @@ func NewPlayer(numPlayer int) Player {
 	var playerJump rl.Texture2D
 	var playerBlock rl.Texture2D
 	var playerAttack rl.Texture2D
+	var playerHeavy rl.Texture2D
 	switch numPlayer {
 	case 1:
 		playerIdle = rl.LoadTexture("./assets/firstplayerright.png")
@@ -42,12 +43,14 @@ func NewPlayer(numPlayer int) Player {
 		playerJump = rl.LoadTexture("./assets/firstplayerjump.png")
 		playerBlock = rl.LoadTexture("./assets/firstplayerblock.png")
 		playerAttack = rl.LoadTexture("./assets/firstplayerpunch.png")
+		playerHeavy = rl.LoadTexture("./assets/firstpersonheavy.png")
 	case 2:
 		playerIdle = rl.LoadTexture("./assets/secondplayerright.png")
 		playerWalk = rl.LoadTexture("./assets/secondplayerrunright.png")
 		playerJump = rl.LoadTexture("./assets/secondplayerjump.png")
 		playerBlock = rl.LoadTexture("./assets/secondplayerblock.png")
 		playerAttack = rl.LoadTexture("./assets/secondplayerpunch.png")
+		playerHeavy = rl.LoadTexture("./assets/secondpersonheavy.png")
 	}
 
 	playerTransform := NewTransform(rl.NewVector2(300, 400))
@@ -64,11 +67,14 @@ func NewPlayer(numPlayer int) Player {
 	jumpState := NewAnimation(playerTransform, playerJump, .2, JUMPSTATE)
 	blockState := NewAnimation(playerTransform, playerBlock, .1, BLOCKSTATE)
 	attackState := NewAnimation(playerTransform, playerAttack, .1, ATTACKSTATE)
+	heavyState := NewAnimation(playerTransform, playerHeavy, .2, HEAVYSTATE)
 	playerStateMachine := NewStateMachine(&idleState)
 	playerStateMachine.AddState(&walkState)
 	playerStateMachine.AddState(&jumpState)
 	playerStateMachine.AddState(&blockState)
 	playerStateMachine.AddState(&attackState)
+	playerStateMachine.AddState(&heavyState)
+
 	return Player{
 		Transform:    playerTransform,
 		Box:          Box{Transform: playerTransform, Size: rl.NewVector2(64, 64), Color: rl.Red},
@@ -94,6 +100,8 @@ func (p *Player) HandlePlayer() {
 			p.PerformBlock()
 		} else if rl.IsKeyDown(rl.KeyE) {
 			p.PerformAttack()
+		} else if rl.IsKeyDown(rl.KeyF) {
+			p.PerformHeavy()
 		} else {
 			p.ChangeState(IDLESTATE)
 		}
@@ -113,6 +121,8 @@ func (p *Player) HandlePlayer() {
 			p.PerformBlock()
 		} else if rl.IsKeyDown(rl.KeySpace) {
 			p.PerformAttack()
+		} else if rl.IsKeyDown(rl.KeySlash) {
+			p.PerformHeavy()
 		} else {
 			p.ChangeState(IDLESTATE)
 		}
@@ -133,6 +143,21 @@ func (p *Player) PerformAttack() {
 
 	p.ChangeState(ATTACKSTATE)
 }
+
+// same for heavy attack
+func (p *Player) PerformHeavy() {
+	// Set heavy attack offset based on current Flip direction
+	attackOffset := rl.NewVector2(40*float32(p.Flip), 0) // Slightly larger offset for heavy attack
+
+	// Calculate the attack position based on offset
+	attackPos := rl.Vector2Add(p.Transform.Pos, attackOffset)
+
+	// Draw a hitbox for the heavy attack (visual cue)
+	rl.DrawRectangle(int32(attackPos.X), int32(attackPos.Y), 30, 15, rl.DarkGreen) // Larger and darker hitbox for heavy attack
+
+	p.ChangeState(HEAVYSTATE)
+}
+
 
 // Same for the block
 func (p *Player) PerformBlock() {
