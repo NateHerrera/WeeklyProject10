@@ -31,11 +31,13 @@ type Animation struct {
 	Timer        float32
 	SwitchTime   float32
 	Name         string
+	
 }
 
 func (a *Animation) TickState() {
 	a.UpdateTime()
 	a.DrawAnimation()
+	
 }
 
 func (a *Animation) GetName() string {
@@ -75,6 +77,7 @@ func (a *Animation) UpdateTime() {
 			a.CurrentIndex = 0
 		}
 	}
+
 }
 
 func (a Animation) DrawAnimation() {

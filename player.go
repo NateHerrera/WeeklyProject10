@@ -25,8 +25,14 @@ type Player struct {
 	*Transform
 	Box
 	StateMachine
-	Health   int
-	PlayerID int
+	Health              int
+	PlayerID            int
+	PunchHitbox         rl.Rectangle
+	attackCooldown      float32
+	heavyAttackCooldown float32
+	lastAttackTime      float32
+	lastHeavyAttackTime float32
+	hasDealtDamage      bool
 }
 
 func NewPlayer(numPlayer int) Player {
@@ -76,11 +82,16 @@ func NewPlayer(numPlayer int) Player {
 	playerStateMachine.AddState(&heavyState)
 
 	return Player{
-		Transform:    playerTransform,
-		Box:          Box{Transform: playerTransform, Size: rl.NewVector2(128, 128), Color: rl.Red},
-		StateMachine: playerStateMachine,
-		Health:       100,
-		PlayerID:     numPlayer,
+		Transform:           playerTransform,
+		Box:                 Box{Transform: playerTransform, Size: rl.NewVector2(128, 128), Color: rl.Red},
+		StateMachine:        playerStateMachine,
+		Health:              100,
+		PlayerID:            numPlayer,
+		attackCooldown:      0.5, // 0.5 seconds for normal attacks
+		heavyAttackCooldown: 1.5, // 1.5 seconds for heavy attacks
+		lastAttackTime:      -1,  // Initially set to -1 to indicate no recent attacks
+		lastHeavyAttackTime: -1,
+		hasDealtDamage:      false,
 	}
 }
 
@@ -115,13 +126,13 @@ func (p *Player) HandlePlayer(p2 *Player) {
 			if p.CurrentState.GetName() == IDLESTATE {
 				p.ChangeState(WALKSTATE)
 			}
-			p.Box.Vel.X = 500
+			p.Transform.Pos.X += 4
 			p.Flip = 1
 		} else if rl.IsKeyDown(rl.KeyA) {
 			if p.CurrentState.GetName() == IDLESTATE {
 				p.ChangeState(WALKSTATE)
 			}
-			p.Box.Vel.X = -500
+			p.Transform.Pos.X -= 4
 			p.Flip = -1
 		} else {
 			p.Box.Vel.X = 0
@@ -132,14 +143,14 @@ func (p *Player) HandlePlayer(p2 *Player) {
 		if rl.IsKeyPressed(rl.KeyW) {
 			if p.CurrentState.GetName() != JUMPSTATE {
 				p.ChangeState(JUMPSTATE)
-				p.Box.Vel.Y = -500
+				p.Transform.Pos.Y -= 10
 			}
 		} else if rl.IsKeyDown(rl.KeyS) {
 			p.PerformBlock()
 		} else if rl.IsKeyDown(rl.KeyE) {
 			p.PerformAttack(p2)
 		} else if rl.IsKeyDown(rl.KeyF) {
-			p.PerformHeavy()
+			p.PerformHeavy(p2)
 		}
 	} else if p.PlayerID == 2 { // Controls for Player 2
 		if rl.IsKeyDown(rl.KeyRight) {
@@ -158,7 +169,7 @@ func (p *Player) HandlePlayer(p2 *Player) {
 		} else if rl.IsKeyDown(rl.KeySpace) {
 			p.PerformAttack(p2)
 		} else if rl.IsKeyDown(rl.KeySlash) {
-			p.PerformHeavy()
+			p.PerformHeavy(p2)
 		} else {
 			p.ChangeState(IDLESTATE)
 		}
@@ -168,14 +179,25 @@ func (p *Player) HandlePlayer(p2 *Player) {
 // Now we need to implement the PerformAttack and PerformBlock functions
 // To flip the character whoich ever way theyre facing
 func (p *Player) PerformAttack(p2 *Player) {
+	// Check if enough time has passed since the last attack
+	if p.StateMachine.StateTimer < p.attackCooldown {
+		return // Exit if still in cooldown
+	}
+
 	// Set attack offset based on current Flip direction
-	attackOffset := rl.NewVector2(30*float32(p.Flip), 0) // Use Flip as set in NewPlayer
+	attackOffset := rl.NewVector2(30*float32(p.Flip), 0)
 
 	// Calculate the attack position based on offset
 	attackPos := rl.Vector2Add(p.Transform.Pos, attackOffset)
+	p.PunchHitbox = rl.NewRectangle(attackPos.X, attackPos.Y, 20, 10)
 
-	// Draw a hitbox for the attack (visual cue)
-	rl.DrawRectangle(int32(attackPos.X), int32(attackPos.Y), 20, 10, rl.Red)
+	// Check if this attack hitbox overlaps with the opponent's hitbox
+	if !p.hasDealtDamage && rl.CheckCollisionRecs(p.PunchHitbox, rl.NewRectangle(p2.Transform.Pos.X, p2.Transform.Pos.Y, p2.Scale.X, p2.Scale.Y)) {
+		p2.Damage(10)
+		knockbackForce := 5 * float32(p.Flip)
+		p2.Transform.Pos.X += knockbackForce
+		p.hasDealtDamage = true // Ensure only one damage per attack instance
+	}
 
 	p.ChangeState(ATTACKSTATE)
 }
@@ -185,15 +207,26 @@ func (p *Player) CheckHit(hitBox rl.Rectangle) bool {
 }
 
 // same for heavy attack
-func (p *Player) PerformHeavy() {
+func (p *Player) PerformHeavy(p2 *Player) {
+	// Check if enough time has passed since the last heavy attack
+	if p.StateMachine.StateTimer < p.heavyAttackCooldown {
+		return // Exit if still in cooldown
+	}
+
 	// Set heavy attack offset based on current Flip direction
-	attackOffset := rl.NewVector2(40*float32(p.Flip), 0) // Slightly larger offset for heavy attack
+	attackOffset := rl.NewVector2(40*float32(p.Flip), 0)
 
 	// Calculate the attack position based on offset
 	attackPos := rl.Vector2Add(p.Transform.Pos, attackOffset)
+	p.PunchHitbox = rl.NewRectangle(attackPos.X, attackPos.Y, 30, 15)
 
-	// Draw a hitbox for the heavy attack (visual cue)
-	rl.DrawRectangle(int32(attackPos.X), int32(attackPos.Y), 30, 15, rl.DarkGreen) // Larger and darker hitbox for heavy attack
+	// Check if this heavy attack hitbox overlaps with the opponent's hitbox
+	if !p.hasDealtDamage && rl.CheckCollisionRecs(p.PunchHitbox, rl.NewRectangle(p2.Transform.Pos.X, p2.Transform.Pos.Y, p2.Scale.X, p2.Scale.Y)) {
+		p2.Damage(15)
+		knockbackForce := 10 * float32(p.Flip)
+		p2.Transform.Pos.X += knockbackForce
+		p.hasDealtDamage = true // Ensure only one damage per attack instance
+	}
 
 	p.ChangeState(HEAVYSTATE)
 }
@@ -217,14 +250,25 @@ func (p *Player) UpdatePlayer(g rl.Vector2, screenWidth float32, p2 *Player) {
 	p.ApplyGravity(g)
 	p.HandlePlayer(p2)
 
-	// Ensure player stays within screen boundaries
 	if p.Transform.Pos.X < 0 {
 		p.Transform.Pos.X = 0
 	} else if p.Transform.Pos.X+p.Scale.X > screenWidth {
 		p.Transform.Pos.X = screenWidth - p.Scale.X
 	}
-	p.DrawBox()
-	p.Tick()
-	p.UpdateBox()
 
+	// Reset the single-hit flag at the end of each attack animation
+	if p.CurrentState.GetName() != ATTACKSTATE && p.CurrentState.GetName() != HEAVYSTATE {
+		p.hasDealtDamage = false
+	}
+
+	p.StateMachine.Tick()
+	p.UpdateBox()
+}
+
+func (p *Player) EnableAttackHitbox() {
+	p.PunchHitbox = rl.NewRectangle(p.Transform.Pos.X+30*float32(p.Flip), p.Transform.Pos.Y, 50, 20)
+}
+
+func (p *Player) DisableAttackHitbox() {
+	p.PunchHitbox = rl.NewRectangle(0, 0, 0, 0) // Reset hotbox
 }
