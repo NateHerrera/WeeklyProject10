@@ -4,6 +4,7 @@ type State interface {
 	TickState()
 	GetName() string
 	ResetTime()
+	GetFrameIndex() int
 }
 
 type StateMachine struct {
@@ -25,12 +26,12 @@ func (sm *StateMachine) AddState(newState State) {
 }
 
 func (sm *StateMachine) ChangeState(stateName string) {
-    if sm.CurrentState.GetName() == stateName {
-        return
-    }
+	if sm.CurrentState.GetName() == stateName {
+		return
+	}
 
-    sm.CurrentState.ResetTime()
-    sm.CurrentState = sm.StateMap[stateName]
+	sm.CurrentState.ResetTime()
+	sm.CurrentState = sm.StateMap[stateName]
 	sm.CurrentState.TickState()
 }
 

@@ -79,12 +79,38 @@ func NewPlayer(numPlayer int) Player {
 		Transform:    playerTransform,
 		Box:          Box{Transform: playerTransform, Size: rl.NewVector2(128, 128), Color: rl.Red},
 		StateMachine: playerStateMachine,
+		Health:       100,
 		PlayerID:     numPlayer,
 	}
 }
 
-func (p *Player) HandlePlayer() {
+func (p *Player) Damage(attackVal int) {
+	damageTaken := attackVal
+
+	switch p.CurrentState.GetName() {
+	case BLOCKSTATE:
+		damageTaken = damageTaken / 2
+	case HEAVYSTATE:
+		damageTaken = (damageTaken * 3) / 2
+	case JUMPSTATE:
+		damageTaken = damageTaken * 2
+	}
+
+	p.Health -= damageTaken
+
+	if p.Health < 0 {
+		p.Health = 0
+	}
+
+}
+
+func (p *Player) HandlePlayer(p2 *Player) {
 	if p.PlayerID == 1 { // Controls for Player 1
+		if p.CurrentState.GetName() == JUMPSTATE {
+			if p.CurrentState.GetFrameIndex() >= 4 {
+				p.ChangeState(IDLESTATE)
+			}
+		}
 		if rl.IsKeyDown(rl.KeyD) {
 			if p.CurrentState.GetName() == IDLESTATE {
 				p.ChangeState(WALKSTATE)
@@ -104,12 +130,14 @@ func (p *Player) HandlePlayer() {
 			}
 		}
 		if rl.IsKeyPressed(rl.KeyW) {
-			p.ChangeState(JUMPSTATE)
-			p.Box.Vel.Y = -500
+			if p.CurrentState.GetName() != JUMPSTATE {
+				p.ChangeState(JUMPSTATE)
+				p.Box.Vel.Y = -500
+			}
 		} else if rl.IsKeyDown(rl.KeyS) {
 			p.PerformBlock()
 		} else if rl.IsKeyDown(rl.KeyE) {
-			p.PerformAttack()
+			p.PerformAttack(p2)
 		} else if rl.IsKeyDown(rl.KeyF) {
 			p.PerformHeavy()
 		}
@@ -128,7 +156,7 @@ func (p *Player) HandlePlayer() {
 		} else if rl.IsKeyDown(rl.KeyDown) {
 			p.PerformBlock()
 		} else if rl.IsKeyDown(rl.KeySpace) {
-			p.PerformAttack()
+			p.PerformAttack(p2)
 		} else if rl.IsKeyDown(rl.KeySlash) {
 			p.PerformHeavy()
 		} else {
@@ -139,7 +167,7 @@ func (p *Player) HandlePlayer() {
 
 // Now we need to implement the PerformAttack and PerformBlock functions
 // To flip the character whoich ever way theyre facing
-func (p *Player) PerformAttack() {
+func (p *Player) PerformAttack(p2 *Player) {
 	// Set attack offset based on current Flip direction
 	attackOffset := rl.NewVector2(30*float32(p.Flip), 0) // Use Flip as set in NewPlayer
 
@@ -150,6 +178,10 @@ func (p *Player) PerformAttack() {
 	rl.DrawRectangle(int32(attackPos.X), int32(attackPos.Y), 20, 10, rl.Red)
 
 	p.ChangeState(ATTACKSTATE)
+}
+
+func (p *Player) CheckHit(hitBox rl.Rectangle) bool {
+	return rl.CheckCollisionRecs(rl.NewRectangle(p.Pos.X, p.Pos.Y, p.Scale.X, p.Scale.Y), hitBox)
 }
 
 // same for heavy attack
@@ -181,9 +213,9 @@ func (p *Player) PerformBlock() {
 	p.ChangeState(BLOCKSTATE)
 }
 
-func (p *Player) UpdatePlayer(g rl.Vector2, screenWidth float32) {
+func (p *Player) UpdatePlayer(g rl.Vector2, screenWidth float32, p2 *Player) {
 	p.ApplyGravity(g)
-	p.HandlePlayer()
+	p.HandlePlayer(p2)
 
 	// Ensure player stays within screen boundaries
 	if p.Transform.Pos.X < 0 {

@@ -47,6 +47,10 @@ func (a *Animation) ResetTime() {
 	a.CurrentIndex = 0
 }
 
+func (a *Animation) GetFrameIndex() int {
+	return a.CurrentIndex
+}
+
 func NewAnimation(newTransform *Transform, newSheet rl.Texture2D, newTime float32, newName string) Animation {
 	spriteDimension := newSheet.Height
 	frames := int(newSheet.Width / spriteDimension)

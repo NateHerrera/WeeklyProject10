@@ -45,12 +45,14 @@ func main() {
 		Color: rl.White,
 	}
 
+	//mainPlatform := Platform{Pos: rl.NewVector2(screenWidth/2, 700), Size: rl.NewVector2(platformWidth, 30), Color: rl.White}
+
 	player1 := NewPlayer(1)
 	gravity := rl.NewVector2(0, 980)
 	player2 := NewPlayer(2)
 	player2.Transform.Pos = rl.NewVector2(1300, 400)
-	
-
+	player1HealthBar := NewProgressBar(295, 5, 500, 50, 5, 5)
+	player2HealthBar := NewProgressBar(805, 5, 500, 50, 5, 5)
 	// Set background scale for resizing
 	backgroundScale := float32(screenHeight) / float32(backgroundTexture.Height)
 
@@ -89,6 +91,8 @@ func main() {
 		platform3.DrawPlatform()
 		platform4.DrawPlatform()
 
+		// mainPlatform.DrawPlatform()
+
 		CheckCollision(&player1.Box, platform1)
 		CheckCollision(&player1.Box, platform2)
 		CheckCollision(&player1.Box, platform3)
@@ -97,9 +101,22 @@ func main() {
 		CheckCollision(&player2.Box, platform2)
 		CheckCollision(&player2.Box, platform3)
 		CheckCollision(&player2.Box, platform4)
+
+		// CheckCollision(&player1.Box, mainPlatform)
+		// CheckCollision(&player2.Box, mainPlatform)
 		// Update and draw the player
-		player1.UpdatePlayer(gravity, screenWidth)
-		player2.UpdatePlayer(gravity, screenWidth)
+		if rl.IsKeyPressed(rl.KeyQ) {
+			player1.Damage(10)
+			player2.Damage(10)
+		}
+
+		player1.UpdatePlayer(gravity, screenWidth, &player2)
+		player2.UpdatePlayer(gravity, screenWidth, &player1)
+
+		player1HealthBar.SetProgress(float32(player1.Health) / 100)
+		player2HealthBar.SetProgress(float32(player2.Health) / 100)
+		player1HealthBar.DrawBarReverse()
+		player2HealthBar.DrawBar()
 
 		rl.EndDrawing()
 	}
