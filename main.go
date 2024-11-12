@@ -60,6 +60,31 @@ func main() {
 	var scrollingBack, scrollingMid, scrollingFore float32 = 0.0, 0.0, 0.0
 
 	for !rl.WindowShouldClose() {
+		if !player1.Alive || !player2.Alive {
+			rl.ClearBackground(rl.Black)
+			rl.BeginDrawing()
+			rl.DrawText("KO!", 200, 200, 200, rl.Red)
+			if !player2.Alive {
+				rl.DrawText("Player 1 Wins!", screenWidth/2, screenHeight/2, 100, rl.White)
+			} else {
+				rl.DrawText("Player 2 Wins!", screenWidth/2, screenHeight/2, 100, rl.White)
+			}
+			rl.DrawText("Press R to restart!", screenWidth/2, (screenHeight/2)+200, 50, rl.White)
+			if rl.IsKeyPressed(rl.KeyR) {
+				player1.Transform.Pos = rl.NewVector2(300, 400)
+				player2.Transform.Pos = rl.NewVector2(1300, 400)
+				player1.Vel = rl.Vector2Zero()
+				player2.Vel = rl.Vector2Zero()
+				player1.Health = 100
+				player2.Health = 100
+				player1.Alive = true
+				player2.Alive = true
+				player1.ChangeState(IDLESTATE)
+				player2.ChangeState(IDLESTATE)
+			}
+			rl.EndDrawing()
+			continue
+		}
 		// Update positions for parallax effect
 		scrollingBack -= 1.0 // Slowest layer
 		scrollingMid -= 2.0  // Middle layer speed
