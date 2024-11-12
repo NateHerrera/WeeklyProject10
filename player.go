@@ -200,8 +200,10 @@ func (p *Player) HandlePlayer(p2 *Player) {
 		}
 
 		if rl.IsKeyPressed(rl.KeyUp) {
-			p.ChangeState(JUMPSTATE)
-			p.Box.Vel.Y = -500
+			if p.CurrentState.GetName() != JUMPSTATE {
+				p.ChangeState(JUMPSTATE)
+				p.Box.Vel.Y = -500
+			}
 		} else if rl.IsKeyPressed(rl.KeySpace) {
 			p.ChangeState(ATTACKSTATE)
 		} else if rl.IsKeyPressed(rl.KeySlash) {
@@ -297,6 +299,11 @@ func (p *Player) UpdatePlayer(g rl.Vector2, screenWidth float32, p2 *Player) {
 
 	p.StateMachine.Tick()
 	p.UpdateBox()
+
+	if p.Transform.Pos.Y >= screenHeight {
+		p.Health = 0
+		p.Alive = false
+	}
 }
 
 func (p *Player) EnableAttackHitbox() {

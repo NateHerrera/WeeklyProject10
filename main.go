@@ -50,7 +50,7 @@ func main() {
 	player1 := NewPlayer(1)
 	gravity := rl.NewVector2(0, 980)
 	player2 := NewPlayer(2)
-	player2.Transform.Pos = rl.NewVector2(1300, 400)
+	player2.Transform.Pos = rl.NewVector2(1300-player2.Scale.X, 400)
 	player1HealthBar := NewProgressBar(295, 5, 500, 50, 5, 5)
 	player2HealthBar := NewProgressBar(805, 5, 500, 50, 5, 5)
 	// Set background scale for resizing
@@ -72,9 +72,11 @@ func main() {
 			rl.DrawText("Press R to restart!", screenWidth/2, (screenHeight/2)+200, 50, rl.White)
 			if rl.IsKeyPressed(rl.KeyR) {
 				player1.Transform.Pos = rl.NewVector2(300, 400)
-				player2.Transform.Pos = rl.NewVector2(1300, 400)
+				player2.Transform.Pos = rl.NewVector2(1300-player2.Scale.X, 400)
 				player1.Vel = rl.Vector2Zero()
 				player2.Vel = rl.Vector2Zero()
+				player1.Flip = 1
+				player2.Flip = -1
 				player1.Health = 100
 				player2.Health = 100
 				player1.Alive = true
@@ -130,10 +132,10 @@ func main() {
 		// CheckCollision(&player1.Box, mainPlatform)
 		// CheckCollision(&player2.Box, mainPlatform)
 		// Update and draw the player
-		if rl.IsKeyPressed(rl.KeyQ) {
-			player1.Damage(10)
-			player2.Damage(10)
-		}
+		// if rl.IsKeyPressed(rl.KeyQ) {
+		// 	player1.Damage(10)
+		// 	player2.Damage(10)
+		// }
 
 		player1.UpdatePlayer(gravity, screenWidth, &player2)
 		player2.UpdatePlayer(gravity, screenWidth, &player1)
