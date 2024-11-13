@@ -259,7 +259,7 @@ func (p *Player) PerformHeavy(p2 *Player) {
 	// Check if this heavy attack hitbox overlaps with the opponent's hitbox
 	if !p.hasDealtDamage && rl.CheckCollisionRecs(p.PunchHitbox, rl.NewRectangle(p2.Transform.Pos.X, p2.Transform.Pos.Y, p2.Scale.X, p2.Scale.Y)) {
 		p2.Damage(20)
-		knockbackForce := 10 * float32(p.Flip)
+		knockbackForce := 20 * float32(p.Flip)
 		p2.Transform.Pos.X += knockbackForce
 		p.hasDealtDamage = true // Ensure only one damage per attack instance
 	}
@@ -270,14 +270,14 @@ func (p *Player) PerformHeavy(p2 *Player) {
 // Same for the block
 func (p *Player) PerformBlock() {
 	// Show block position based on Flip
-	blockOffset := rl.NewVector2(15, 0) // Offset for block positioning
-	if p.Flip == -1 {                   // Facing left
-		blockOffset.X = -15
-	}
-	blockPos := rl.Vector2Add(rl.Vector2Add(p.Transform.Pos, rl.NewVector2(p.Scale.X/2, p.Scale.Y/2)), blockOffset)
+	// blockOffset := rl.NewVector2(15, 0) // Offset for block positioning
+	// if p.Flip == -1 {                   // Facing left
+	// 	blockOffset.X = -15
+	// }
+	// blockPos := rl.Vector2Add(rl.Vector2Add(p.Transform.Pos, rl.NewVector2(p.Scale.X/2, p.Scale.Y/2)), blockOffset)
 
-	// Draw the block hitbox or stance
-	rl.DrawRectangle(int32(blockPos.X), int32(blockPos.Y), 25, 15, rl.Blue) // Visual cue for block
+	// // Draw the block hitbox or stance
+	// rl.DrawRectangle(int32(blockPos.X), int32(blockPos.Y), 25, 15, rl.Blue) // Visual cue for block
 
 	p.ChangeState(BLOCKSTATE)
 }
